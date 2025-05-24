@@ -221,22 +221,23 @@ def _format_pydantic_to_function_declaration(
     )
 
 
+# Ensure we send "anyOf" parameters through pydantic v2 schema parsing
+def _check_v2(parameters):
+    properties = parameters.get("properties", {}).values()
+    for property in properties:
+        if "anyOf" in property:
+            return True
+        if "parameters" in property:
+            return _check_v2(property["parameters"])
+        if "items" in property:
+            return _check_v2(property["items"])
+    return False
+
+
 def _format_dict_to_function_declaration(
     tool: Union[FunctionDescription, Dict[str, Any]],
 ) -> gapic.FunctionDeclaration:
     pydantic_version_v2 = False
-
-    # Ensure we send "anyOf" parameters through pydantic v2 schema parsing
-    def _check_v2(parameters):
-        properties = parameters.get("properties", {}).values()
-        for property in properties:
-            if "anyOf" in property:
-                return True
-            if "parameters" in property:
-                return _check_v2(property["parameters"])
-            if "items" in property:
-                return _check_v2(property["items"])
-        return False
 
     if isinstance(tool, dict):
         pydantic_version_v2 = _check_v2(tool.get("parameters", {}))

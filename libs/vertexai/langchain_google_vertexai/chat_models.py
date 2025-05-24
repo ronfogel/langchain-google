@@ -149,7 +149,7 @@ from pydantic.v1 import BaseModel as BaseModelV1
 from typing_extensions import Self, is_typeddict
 from difflib import get_close_matches
 from langchain_google_vertexai.functions_utils import (
-    _dict_to_gapic_schema,
+    _dict_to_gapic_schema_utils,
     _check_v2,
 )
 
@@ -2074,7 +2074,7 @@ class ChatVertexAI(_VertexAICommon, BaseChatModel):
                 else:
                     schema_json = schema.model_json_schema()
                     pydantic_version = "v2"
-                schema_json = _dict_to_gapic_schema(
+                schema_json = _dict_to_gapic_schema_utils(
                     schema_json, pydantic_version=pydantic_version
                 )
                 parser = PydanticOutputParser(pydantic_object=schema)
@@ -2088,11 +2088,11 @@ class ChatVertexAI(_VertexAICommon, BaseChatModel):
 
                 pydantic_version_v2 = _check_v2(schema_json)
                 if pydantic_version_v2:
-                    schema_json = _dict_to_gapic_schema(
+                    schema_json = _dict_to_gapic_schema_utils(
                         schema_json, pydantic_version="v2"
                     )
                 else:
-                    schema_json = _dict_to_gapic_schema(schema_json)
+                    schema_json = _dict_to_gapic_schema_utils(schema_json)
                 parser = JsonOutputParser()
 
             llm = self.bind(
